@@ -1,4 +1,5 @@
 import { createBucketClient } from '@cosmicjs/sdk';
+import { Project, Skill, Testimonial } from '@/types';
 
 export const cosmic = createBucketClient({
   bucketSlug: process.env.COSMIC_BUCKET_SLUG as string,
@@ -20,12 +21,12 @@ export async function getDashboardStats() {
       cosmic.objects.find({ type: 'testimonials' }).props(['id', 'metadata.rating'])
     ]);
 
-    const projects = projectsRes.objects;
-    const skills = skillsRes.objects;
-    const testimonials = testimonialsRes.objects;
+    const projects = projectsRes.objects as Project[];
+    const skills = skillsRes.objects as Skill[];
+    const testimonials = testimonialsRes.objects as Testimonial[];
 
-    const featuredProjects = projects.filter(p => p.metadata?.featured === true).length;
-    const totalRating = testimonials.reduce((sum, t) => sum + (t.metadata?.rating || 0), 0);
+    const featuredProjects = projects.filter((p: Project) => p.metadata?.featured === true).length;
+    const totalRating = testimonials.reduce((sum: number, t: Testimonial) => sum + (t.metadata?.rating || 0), 0);
     const averageRating = testimonials.length > 0 ? totalRating / testimonials.length : 0;
 
     return {
@@ -56,7 +57,8 @@ export async function getAllProjects() {
       .props(['id', 'title', 'slug', 'metadata', 'created_at'])
       .depth(1);
     
-    return response.objects.sort((a, b) => {
+    const projects = response.objects as Project[];
+    return projects.sort((a: Project, b: Project) => {
       const orderA = a.metadata?.order || 0;
       const orderB = b.metadata?.order || 0;
       return orderA - orderB;
